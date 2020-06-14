@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import Slider from "react-input-slider";
 import "./SearchAlgorithmVisualizer.css";
 
@@ -11,12 +11,19 @@ class SearchAlgorithmVisualizer extends Component {
       array: [],
       searchValue: 5,
       foundIndex: -1,
+      hasAnimationEnded: false,
     };
   }
 
   handleChange = (event) => {
     this.setState({
       searchValue: event.target.value,
+    });
+  };
+
+  handleLengthChange = (event) => {
+    this.setState({
+      arrayLength: event.target.value,
     });
   };
 
@@ -31,14 +38,30 @@ class SearchAlgorithmVisualizer extends Component {
     });
   };
 
+  animationHasEnded = () => {
+    this.setState({
+      hasAnimationEnded: true,
+    });
+  };
+
   linearSearch = () => {
     var j = -1;
-    for (let i = 0; i < this.state.arrayLength; i++) {
+    let i = 0;
+    while (i < this.state.arrayLength) {
       if (this.state.array[i] == this.state.searchValue) {
         j = i;
         break;
       }
+      if (this.state.hasAnimationEnded) {
+        i++;
+      }
     }
+    // for (let i = 0; i < this.state.arrayLength; i++) {
+    //   if (this.state.array[i] == this.state.searchValue) {
+    //     j = i;
+    //     break;
+    //   }
+    // }
 
     this.setState({
       foundIndex: j,
@@ -47,30 +70,49 @@ class SearchAlgorithmVisualizer extends Component {
 
   render() {
     return (
-      <div>
+      <Fragment>
         <header>Search Algorithm Visualizer</header>
         <div className="main">
           <div className="left-side">
             <label>Length of Array</label>
             <br />
-            <label>{this.state.arrayLength}</label>
+            <input
+              value={this.state.arrayLength}
+              id="array-length"
+              onChange={this.handleLengthChange}
+            />
             <Slider
               axis="x"
               xstep={1}
               xmin={4}
               xmax={40}
               x={this.state.arrayLength}
+              styles={{
+                track: {
+                  backgroundColor: "rgba(255, 0, 0, 0.2)",
+                  width: 200,
+                  height: 16,
+                },
+                active: {
+                  backgroundColor: "rgba(255, 0, 0, 1)",
+                },
+              }}
               onChange={({ x }) =>
                 this.setState({ arrayLength: parseFloat(x.toFixed(2)) })
               }
             />
-            <button onClick={this.generateArray}>Generate a new Array</button>
+            <br />
+            <button onClick={this.generateArray} id="generate-button">
+              Generate a new Array
+            </button>
           </div>
 
           <div className="right-side">
             <div className="array-display">
               {this.state.array.map((element) => (
-                <p className="box">{element}</p>
+                <p className="box" onAnimationEnd={this.animationHasEnded}>
+                  {element}
+                </p>
               ))}
             </div>
             <br />
@@ -89,7 +131,7 @@ class SearchAlgorithmVisualizer extends Component {
             </div>
           </div>
         </div>
-      </div>
+      </Fragment>
     );
   }
 }
